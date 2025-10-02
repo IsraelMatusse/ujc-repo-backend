@@ -1,0 +1,29 @@
+FROM node:22-bullseye AS builder
+
+WORKDIR /usr/src/app
+RUN yarn config set registry https://registry.npmmirror.com --global && \
+    yarn config set disturl https://npmmirror.com/dist --global && \
+    yarn config set network-timeout 600000 --global
+
+COPY package.json yarn.lock ./
+COPY prisma ./prisma
+RUN yarn install --frozen-lockfile --network-timeout 600000
+RUN yarn prisma generate
+
+COPY . .
+
+RUN mkdir -p /usr/src/app/logs && \
+    chown -R node:node /usr/src/app
+
+FROM node:22-bullseye
+
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app .
+RUN mkdir -p logs && chown -R node:node logs 
+
+RUN mkdir -p /usr/src/app/uploads && chown -R node:node /usr/src/app/uploads
+
+
+USER node
+EXPOSE 4000
+CMD ["yarn", "dev"]

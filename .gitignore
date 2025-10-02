@@ -1,0 +1,15 @@
+node_modules
+dist
+# Keep environment variables out of version control
+.env
+logs
+.logs
+uploads
+.uploads
+.DS_STORE
+/uploads/
+api_logs
+dbdata
+/src/generated/prisma
+
+/src/generated/prisma

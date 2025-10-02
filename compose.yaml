@@ -1,0 +1,54 @@
+services:
+  api:
+    image: netlineserv/salao-eventos-core:demo
+    container_name: salao-eventos-api
+    networks:
+      - salaoeventosnet
+    ports:
+      - "4000:4001"
+    restart: always
+    user: "node"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASS}@db:5432/${DATABASE_NAME}
+      - PORT=${PORT}
+      - TOKEN_SECRET=${TOKEN_SECRET}
+      - NODE_ENV=${NODE_ENV}
+      - APP_VERSION=${APP_VERSION}
+
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./logs:/usr/src/app/logs
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4001/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:16.0
+    container_name: salao-eventos-db
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASS}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD:-trust}
+    networks:
+      - salaoeventosnet
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+networks:
+  salaoeventosnet:
+    driver: bridge

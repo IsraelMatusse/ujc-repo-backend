@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  code      String   @unique
+  password  String
+  fullName  String?
+  status    Boolean @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+  role      Role     @default(USER)
+  @@map("users")
+}
+
+model Course {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  code      String
+  status    Boolean  @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+
+  @@map("courses")
+  Subject Subject[]
+}
+
+model Subject {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  code      String
+  credits   Int?
+  status    Boolean  @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+
+  courseId String   @db.Uuid @map("course_id")
+  course   Course   @relation(fields: [courseId], references: [id])
+  semesterId String   @db.Uuid @map("semester_id")
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  @@map("subjects")
+  Material Material[]
+}
+
+model Semester {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  code      String   @unique
+  status    Boolean  @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+
+  yearId    String   @db.Uuid @map("year_id")
+  year      Year     @relation(fields: [yearId], references: [id])
+
+  @@map("semesters")
+  Subject Subject[]
+}
+
+model Year {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  order     Int
+  code      String   @unique
+  status    Boolean  @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+
+  @@map("years")
+  Semester Semester[]
+}
+model File {
+  id          String      @id @default(uuid()) @db.Uuid
+  designation String   
+  type        String
+  path        String
+  createdAt             DateTime @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt             DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt             DateTime? @db.Timestamp(6) @map("deleted_at") 
+
+  @@map("files")
+  Material Material[]
+}
+
+model Material {
+  id        String     @id @default(uuid()) @db.Uuid
+  title     String
+  description String?
+  author    String?
+  year      Int?
+  status    Boolean  @default(true)
+  createdAt       DateTime     @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
+  deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
+
+  subjectId String   @db.Uuid @map("subject_id")
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+
+  fileId    String   @db.Uuid @map("file_id")
+  file      File     @relation(fields: [fileId], references: [id])
+
+  @@map("materials")
+}
