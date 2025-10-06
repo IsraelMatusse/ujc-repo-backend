@@ -1,5 +1,5 @@
-import { PrismaClient } from "#generated/prisma";
-import { ConflictException } from "#infrastructure/exceptions/defaultExceptions";
+import { PrismaClient, Semester } from "#generated/prisma";
+import { ConflictException, NotFoundException } from "#infrastructure/exceptions/defaultExceptions";
 import { generateAleatoryCodes } from "#infrastructure/utils/codes";
 import { SemesterCreationData } from "#interfaces/request/semester";
 import { SemesterResponse } from "#interfaces/response/semester";
@@ -54,5 +54,15 @@ export class SemesterService {
       year: semester.name,
       status: semester.status,
     }));
+  }
+
+  async findById(id: string): Promise<Semester> {
+    const semester = await prisma.semester.findUnique({
+      where: { id },
+    });
+    if (!semester) {
+      throw new NotFoundException("Semestre n\xE3o encontrado");
+    }
+    return semester;
   }
 }

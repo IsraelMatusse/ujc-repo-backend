@@ -8,6 +8,7 @@ import { uploadSingle } from "#application/middleware/uploadFile";
 import { FileController } from "#interfaces/controller/file";
 import { YearController } from "#interfaces/controller/year";
 import { SemesterController } from "#interfaces/controller/semester";
+import { CourseController } from "#interfaces/controller/course";
 
 const routes = express.Router();
 
@@ -17,6 +18,7 @@ const authController = new AuthController();
 const fileController = new FileController();
 const yearController = new YearController();
 const semesterController = new SemesterController();
+const courseController = new CourseController();
 
 routes.get("/", rateLimiter, healthController.checkApiHealth);
 routes.post("/auth/login", rateLimiter, authController.login.bind(authController));
@@ -40,4 +42,9 @@ routes.get("/years", rateLimiter, authenticateToken, yearController.getAllYears.
 routes.post("/semesters", rateLimiter, authenticateToken, semesterController.createSemester.bind(yearController));
 routes.get("/semesters", rateLimiter, authenticateToken, semesterController.getAllSemesters.bind(yearController));
 routes.get("/semesters/year/:yearId", rateLimiter, authenticateToken, semesterController.getSemestersByYear.bind(yearController));
+
+//course
+routes.post("/courses", rateLimiter, authenticateToken, courseController.createCourse.bind(courseController));
+routes.get("/courses", rateLimiter, authenticateToken, courseController.getAllCourses.bind(courseController));
+
 export default routes;
