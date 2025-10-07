@@ -9,6 +9,7 @@ import { FileController } from "#interfaces/controller/file";
 import { YearController } from "#interfaces/controller/year";
 import { SemesterController } from "#interfaces/controller/semester";
 import { CourseController } from "#interfaces/controller/course";
+import { SubjectController } from "#interfaces/controller/subject";
 
 const routes = express.Router();
 
@@ -19,6 +20,7 @@ const fileController = new FileController();
 const yearController = new YearController();
 const semesterController = new SemesterController();
 const courseController = new CourseController();
+const subjectController = new SubjectController();
 
 routes.get("/", rateLimiter, healthController.checkApiHealth);
 routes.post("/auth/login", rateLimiter, authController.login.bind(authController));
@@ -47,4 +49,9 @@ routes.get("/semesters/year/:yearId", rateLimiter, authenticateToken, semesterCo
 routes.post("/courses", rateLimiter, authenticateToken, courseController.createCourse.bind(courseController));
 routes.get("/courses", rateLimiter, authenticateToken, courseController.getAllCourses.bind(courseController));
 
+//subjects
+routes.post("/subjects", rateLimiter, authenticateToken, subjectController.createSubject.bind(subjectController));
+routes.get("/subjects", rateLimiter, authenticateToken, subjectController.getAllSubjects.bind(subjectController));
+routes.get("/subjects/course/:courseId", rateLimiter, authenticateToken, subjectController.getSubjectsByCourse.bind(subjectController));
+routes.get("/subjects/semester/:semesterId", rateLimiter, authenticateToken, subjectController.getSubjectsBySemester.bind(subjectController));
 export default routes;

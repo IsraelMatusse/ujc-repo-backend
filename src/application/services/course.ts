@@ -3,18 +3,52 @@ import { ConflictException, NotFoundException } from "#infrastructure/exceptions
 import { generateAleatoryCodes } from "#infrastructure/utils/codes";
 import { formatDateToSouthAfrica } from "#infrastructure/utils/dateUtils";
 import { CourseRequest } from "#interfaces/request/course";
-import { CourseResponse } from "#interfaces/response/course";
+import { CourseResponse, CourseWithSubjects } from "#interfaces/response/course";
 
 const prisma = new PrismaClient();
 export class CourseService {
   async getAllCourses(): Promise<CourseResponse[]> {
-    const courses = await prisma.course.findMany();
+    const courses = await prisma.course.findMany({
+      where: { status: true, deletedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
     return courses.map((course) => ({
       id: course.id,
       name: course.name,
       code: course.code,
       status: course.status,
       createdAt: formatDateToSouthAfrica(course.createdAt),
+    }));
+  }
+
+  async getCoursesWithSubjects(): Promise<CourseWithSubjects[]> {
+    const courses = await prisma.course.findMany({
+      where: { status: true, deletedAt: null },
+      include: {
+        Subject: {
+          where: { status: true, deletedAt: null },
+          include: { semester: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return courses.map((course) => ({
+      id: course.id,
+      name: course.name,
+      code: course.code,
+      status: course.status,
+      createdAt: formatDateToSouthAfrica(course.createdAt),
+      subjects: course.Subject.map((subject) => ({
+        id: subject.id,
+        name: subject.name,
+        credits: subject.credits ?? 0,
+        courseId: subject.courseId,
+        semesterId: subject.semesterId,
+        createdAt: formatDateToSouthAfrica(subject.createdAt),
+        course: course.name,
+        semester: subject.semester?.name ?? "",
+      })),
     }));
   }
 

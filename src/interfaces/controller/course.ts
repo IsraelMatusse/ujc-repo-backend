@@ -17,7 +17,7 @@ export class CourseController {
 
   async getAllCourses(req: Request, res: Response, next: NextFunction) {
     try {
-      const courses = await courseServe.getAllCourses();
+      const courses = await courseServe.getCoursesWithSubjects();
       res.json(new ApiResponse(StatusCodes.OK, "Cursos encontrados", courses));
     } catch (error) {
       next(error);

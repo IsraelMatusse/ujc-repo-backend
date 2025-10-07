@@ -31,13 +31,15 @@ export class SemesterService {
   }
 
   async getSemesters(): Promise<SemesterResponse[]> {
-    const semesters = await prisma.semester.findMany();
+    const semesters = await prisma.semester.findMany({
+      include: { year: true },
+    });
     return semesters.map((semester) => ({
       id: semester.id,
       name: semester.name,
       yearId: semester.yearId,
       code: semester.code,
-      year: semester.name,
+      year: semester.year.name ? semester.year.name : "",
       status: semester.status,
     }));
   }
@@ -45,13 +47,14 @@ export class SemesterService {
   async getSemestersByYear(yearId: string): Promise<SemesterResponse[]> {
     const semesters = await prisma.semester.findMany({
       where: { yearId },
+      include: { year: true },
     });
     return semesters.map((semester) => ({
       id: semester.id,
       name: semester.name,
       yearId: semester.yearId,
       code: semester.code,
-      year: semester.name,
+      year: semester.year.name ? semester.year.name : "",
       status: semester.status,
     }));
   }
