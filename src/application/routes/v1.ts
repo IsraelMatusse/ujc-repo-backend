@@ -47,11 +47,11 @@ routes.get("/semesters/year/:yearId", rateLimiter, authenticateToken, semesterCo
 
 //course
 routes.post("/courses", rateLimiter, authenticateToken, courseController.createCourse.bind(courseController));
-routes.get("/courses", rateLimiter, authenticateToken, courseController.getAllCourses.bind(courseController));
+routes.get("/courses", rateLimiter, courseController.getAllCourses.bind(courseController));
 
 //subjects
 routes.post("/subjects", rateLimiter, authenticateToken, subjectController.createSubject.bind(subjectController));
-routes.get("/subjects", rateLimiter, authenticateToken, subjectController.getAllSubjects.bind(subjectController));
-routes.get("/subjects/course/:courseId", rateLimiter, authenticateToken, subjectController.getSubjectsByCourse.bind(subjectController));
-routes.get("/subjects/semester/:semesterId", rateLimiter, authenticateToken, subjectController.getSubjectsBySemester.bind(subjectController));
+routes.get("/subjects", rateLimiter, subjectController.getAllSubjects.bind(subjectController));
+routes.get("/subjects/course/:courseId", rateLimiter, subjectController.getSubjectsByCourse.bind(subjectController));
+routes.get("/subjects/semester/:semesterId", rateLimiter, subjectController.getSubjectsBySemester.bind(subjectController));
 export default routes;
