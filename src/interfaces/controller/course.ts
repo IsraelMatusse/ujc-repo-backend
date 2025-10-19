@@ -23,4 +23,14 @@ export class CourseController {
       next(error);
     }
   }
+
+  async getCourseDetailsById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const courseId = req.params.id;
+      const courseDetails = await courseServe.getCourseDetailsById(courseId);
+      res.json(new ApiResponse(StatusCodes.OK, "Detalhes do curso encontrados", courseDetails));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

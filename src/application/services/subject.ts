@@ -47,6 +47,31 @@ export class SubjectService {
     return subject;
   }
 
+  async findDetailsById(id: string): Promise<SubjectResponse> {
+    const subject = await prisma.subject.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        semester: true,
+      },
+    });
+
+    if (!subject) {
+      throw new NotFoundException("Disciplina n\xE3o encontrada");
+    }
+
+    return {
+      id: subject.id,
+      name: subject.name,
+      credits: subject.credits ?? 0,
+      courseId: subject.courseId,
+      semesterId: subject.semesterId,
+      createdAt: formatDateToSouthAfrica(subject.createdAt),
+      course: subject.course.name,
+      semester: subject.semester.name,
+    };
+  }
+
   async findAll(): Promise<SubjectResponse[]> {
     const subjects = await prisma.subject.findMany({
       where: { status: true, deletedAt: null },

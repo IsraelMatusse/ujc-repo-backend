@@ -2,6 +2,7 @@ import { PrismaClient } from "#generated/prisma";
 import { formatDateToSouthAfrica } from "#infrastructure/utils/dateUtils";
 import { MaterialRequest } from "#interfaces/request/material";
 import { MaterialResponse } from "#interfaces/response/material";
+import { da } from "zod/v4/locales";
 
 const prisma = new PrismaClient();
 export class MaterialService {
@@ -13,12 +14,16 @@ export class MaterialService {
         title: data.title,
         description: data.description,
         type: data.type,
+        author: data.author,
       },
     });
   }
 
   async getMaterials(): Promise<MaterialResponse[]> {
     const materials = await prisma.material.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
       where: {
         status: true,
       },
@@ -42,6 +47,9 @@ export class MaterialService {
 
   async getMaterialsBySubject(subjectId: string): Promise<MaterialResponse[]> {
     const materials = await prisma.material.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
       where: {
         subjectId,
         status: true,
@@ -66,6 +74,9 @@ export class MaterialService {
 
   async getMaterialByCourse(courseId: string): Promise<MaterialResponse[]> {
     const materials = await prisma.material.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
       where: {
         subject: {
           courseId,

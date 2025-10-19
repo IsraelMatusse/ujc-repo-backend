@@ -28,7 +28,17 @@ export class MaterialController {
     try {
       const subjectId = req.params.subjectId;
       const materials = await materialService.getMaterialsBySubject(subjectId);
-      res.json(new ApiResponse(StatusCodes.OK, "Materiais encontrados", materials));
+      res.json(new ApiResponse(StatusCodes.OK, "Material da disciplina", materials));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getMaterialsByCourse(req: Request, res: Response, next: NextFunction) {
+    try {
+      const courseId = req.params.courseId;
+      const materials = await materialService.getMaterialByCourse(courseId);
+      res.json(new ApiResponse(StatusCodes.OK, "Material do curso", materials));
     } catch (error) {
       next(error);
     }

@@ -43,4 +43,14 @@ export class SubjectController {
       next(error);
     }
   }
+
+  async getSubjectById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+      const subject = await subjectService.findDetailsById(id);
+      res.json(new ApiResponse(StatusCodes.OK, "Disciplina buscada", subject));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
