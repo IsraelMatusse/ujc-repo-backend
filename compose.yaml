@@ -1,13 +1,14 @@
+
 services:
   ujc_repo:
     build: .
     ports:
-      - '4001:4002'
+      - "4001:4002"
     environment:
-      DATABASE_URL: postgresql://postgres:adminsecret@postgres:5432/ujc_repo_db
+      DATABASE_URL: postgresql://postgres:adminsecret@db:5432/ujc_repo_db
       DATABASE_USER: postgres
       DATABASE_PASS: adminsecret
-      DATABASE_HOST: localhost
+      DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_NAME: ujc_repo_db
       NODE_ENV: production
@@ -17,9 +18,12 @@ services:
     volumes:
       - uploads:/usr/src/app/uploads
       - ./logs:/usr/src/app/logs
-    
+    depends_on:
+      - db
+    networks:
+      - ujcreponet
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4001/v1/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4002/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -29,22 +33,27 @@ services:
     image: postgres:16.0
     container_name: ujc_repo_db
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASS}
-      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD:-trust}
+      POSTGRES_DB: ujc_repo_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: adminsecret
+      POSTGRES_HOST_AUTH_METHOD: trust
     networks:
       - ujcreponet
     volumes:
-      - ./dbdata:/var/lib/postgresql/data
+      - dbdata:/var/lib/postgresql/data
     ports:
       - "5434:5432"
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ujc_repo_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+
 networks:
   ujcreponet:
     driver: bridge
+
+volumes:
+  uploads:
+  dbdata:
