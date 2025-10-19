@@ -1,0 +1,75 @@
+name: 🚀 Deploy to Server
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: 🔒 Conectar via SSH e implantar
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          timeout: 20m
+          script: |
+            set -e
+
+            echo "📁 Acessando diretório do projeto"
+            cd /root/projects/ujc-repo-backend
+
+            echo "🔄 Atualizando repositório"
+            if [ -d ".git" ]; then
+              git pull
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+
+            echo "⚙️ Atualizando .env"
+            cat > .env << EOL
+            DATABASE_URL=postgresql://postgres:secret@postgres:5432/ujc_repo_db
+            DATABASE_USER=postgres
+            DATABASE_PASSWORD=secret
+            DATABASE_HOST=postgres
+            DATABASE_PORT=5432
+            DATABASE_NAME=ujc_repo_db
+            SECRET_KEY=37e9d6ab3e33d16a4f521d0421feeb29be71479cf2cb80e97b62f0bde71c7d3a
+            PORT=4002
+            BASE_URL=http://${{ secrets.SERVER_IP }}:4001
+            EOL
+
+           
+
+            echo "🧹 Limpando cache do Docker antes do build"
+            docker builder prune -f || true
+
+            echo "📦 Buildando aplicação (com retry em caso de falha)"
+            if ! docker compose build ujc-repo-backend; then
+              echo "⚠️ Primeira tentativa de build falhou, tentando novamente..."
+              sleep 10
+              docker compose build ujc-repo-backend --no-cache
+            fi
+
+            echo "🧱 Executando migrations"
+            docker compose run --rm ujc-repo-backendyarn migrate
+
+            echo "🚀 Subindo aplicação"
+            docker compose up -d
+
+            echo "✅ Verificando status"
+            sleep 10  # Aguarda um pouco para o container inicializar
+            if ! docker compose ps | grep -q ujc-repo-backend; then
+              echo "❌ Erro: container não está rodando"
+              docker compose logs ujc-repo-backend
+              exit 1
+            fi
+
+            echo "🧹 Limpando imagens antigas"
+            docker system prune -f
