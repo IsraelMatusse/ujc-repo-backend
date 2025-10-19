@@ -4,12 +4,12 @@ services:
     ports:
       - '4001:4002'
     environment:
-      DATABASE_URL: postgresql://postgres:secret@postgres:5432/ujc_repo_db
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASS: ${DATABASE_PASS:-adminsecret}
-      DATABASE_HOST: ${DATABASE_HOST:-localhost}
+      DATABASE_URL: postgresql://postgres:adminsecret@postgres:5432/ujc_repo_db
+      DATABASE_USER: postgres
+      DATABASE_PASS: adminsecret
+      DATABASE_HOST: localhost
       DATABASE_PORT: 5432
-      DATABASE_NAME: ${DATABASE_NAME:-ujc_repo_db}
+      DATABASE_NAME: ujc_repo_db
       NODE_ENV: production
       JWT_ISSUER: UJCRepo
       SECRET_KEY: 37e9d6ab3e33d16a4f521d0421feeb29be71479cf2cb80e97b62f0bde71c7d3a
