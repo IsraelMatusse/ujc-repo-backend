@@ -1,4 +1,3 @@
-
 FROM node:22-bullseye AS builder
 
 WORKDIR /usr/src/app
@@ -13,7 +12,6 @@ RUN yarn install --frozen-lockfile --network-timeout 600000
 
 COPY prisma ./prisma
 
-ENV PRISMA_CLI_QUERY_ENGINE_TYPE="binary"
 RUN npx prisma generate
 
 COPY . .
