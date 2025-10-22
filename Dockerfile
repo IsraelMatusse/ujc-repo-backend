@@ -9,11 +9,12 @@ RUN yarn config set registry https://registry.npmmirror.com --global && \
 COPY package.json yarn.lock ./
 COPY prisma ./prisma
 
-# Instalar dependências com yarn
-RUN yarn install --frozen-lockfile --network-timeout 600000
+# Limpar cache e instalar dependências
+RUN yarn cache clean && \
+    yarn install --frozen-lockfile --network-timeout 600000
 
-# Gerar cliente Prisma usando npx (mais confiável)
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Gerar cliente Prisma
+RUN npx prisma generate
 
 COPY . .
 
