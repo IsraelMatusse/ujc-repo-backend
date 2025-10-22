@@ -3,7 +3,7 @@ services:
   ujc_repo:
     build: .
     ports:
-      - "4001:4002"
+      - "4020:4002"
     environment:
       DATABASE_URL: postgresql://postgres:adminsecret@db:5432/ujc_repo_db
       DATABASE_USER: postgres
@@ -42,7 +42,7 @@ services:
     volumes:
       - dbdata:/var/lib/postgresql/data
     ports:
-      - "5434:5432"
+      - "5409:5432"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ujc_repo_db"]
