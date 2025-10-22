@@ -20,6 +20,7 @@ services:
       - ./logs:/usr/src/app/logs
     depends_on:
       - db
+    command: sh -c "yarn prisma migrate deploy && yarn dev"
     networks:
       - ujcreponet
     healthcheck:
