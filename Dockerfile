@@ -2,19 +2,18 @@ FROM node:22-bullseye AS builder
 
 WORKDIR /usr/src/app
 
-RUN yarn config set registry https://registry.npmmirror.com --global && \
-    yarn config set disturl https://npmmirror.com/dist --global && \
-    yarn config set network-timeout 600000 --global
-
 COPY package.json yarn.lock ./
 COPY prisma ./prisma
 
-# Limpar cache e instalar dependências
-RUN yarn cache clean && \
-    yarn install --frozen-lockfile --network-timeout 600000
+# Instalar dependências SEM o registry mirror (o mirror pode estar causando problemas com binários do Prisma)
+RUN yarn install --frozen-lockfile --network-timeout 600000
+
+# Deletar node_modules do Prisma e reinstalar
+RUN rm -rf node_modules/@prisma node_modules/.prisma && \
+    yarn add @prisma/client prisma --network-timeout 600000
 
 # Gerar cliente Prisma
-RUN npx prisma generate
+RUN yarn prisma generate
 
 COPY . .
 
