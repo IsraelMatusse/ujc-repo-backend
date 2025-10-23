@@ -15,7 +15,7 @@ export class UserService {
     }));
   }
 
-  async createUser(userData: UserCreationData) {
+  async createUser(userData: UserCreationData): Promise<{ password: string; user: User }> {
     if (await this.existsByEmail(userData.email)) {
       throw new ConflictException("Email introduzido j\xE1 se encontra em uso.");
     }
@@ -30,6 +30,7 @@ export class UserService {
         code: code,
       },
     });
+    return { password: userData.password, user: newUser };
   }
 
   async getOnlineUser(authUser: AuthUser): Promise<User> {
