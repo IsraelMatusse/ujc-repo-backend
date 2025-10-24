@@ -15,6 +15,7 @@ function authenticateToken(req: RequestWithUser, res: Response, next: NextFuncti
     return;
   }
 
+  console.log("token", token);
   jwt.verify(token, process.env.TOKEN_SECRET as string, (err: unknown, user: AuthUser) => {
     if (err) {
       res.status(StatusCodes.FORBIDDEN).json(new ApiResponse(StatusCodes.FORBIDDEN, "Token is invalid!", null));

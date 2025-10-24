@@ -4,15 +4,17 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { ApiResponse } from "#interfaces/response/apiResponse";
 import { RequestWithUser } from "#infrastructure/types";
+import { AuthService } from "#application/services/auth";
 
 const userService = new UserService();
-
+const authService = new AuthService();
 export class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
       const data = req.body as UserCreationData;
       const user = await userService.createUser(data);
-      res.status(StatusCodes.CREATED).json(new ApiResponse(StatusCodes.CREATED, "Usuário criado com sucesso", null));
+      const userData = await authService.autenticateUser({ email: user.user.email, password: data.password });
+      res.status(StatusCodes.CREATED).json(new ApiResponse(StatusCodes.CREATED, "Usuário criado com sucesso", userData));
     } catch (error) {
       next(error);
     }

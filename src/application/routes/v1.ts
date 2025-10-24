@@ -40,11 +40,13 @@ routes.get("/uploads/:filename", rateLimiter, fileController.getUploadedFile.bin
 //year
 routes.post("/years", rateLimiter, yearController.createYear.bind(yearController));
 routes.get("/years", rateLimiter, yearController.getAllYears.bind(yearController));
+routes.put("/years/:id", rateLimiter, yearController.updateYear.bind(yearController));
 
 // semester
 
 routes.post("/semesters", rateLimiter, semesterController.createSemester.bind(yearController));
 routes.get("/semesters", rateLimiter, semesterController.getAllSemesters.bind(yearController));
+routes.put("/semesters/:id", rateLimiter, semesterController.updateSenester.bind(yearController));
 routes.get("/semesters/year/:yearId", rateLimiter, authenticateToken, semesterController.getSemestersByYear.bind(yearController));
 
 //course

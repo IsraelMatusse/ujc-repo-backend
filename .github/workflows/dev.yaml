@@ -40,34 +40,33 @@ jobs:
             DATABASE_HOST=postgres
             DATABASE_PORT=5432
             DATABASE_NAME=ujc_repo_db
-            SECRET_KEY=37e9d6ab3e33d16a4f521d0421feeb29be71479cf2cb80e97b62f0bde71c7d3a
-            PORT=4002
-            BASE_URL=http://${{ secrets.SERVER_IP }}:4001
-            EOL
+            TOKEN_SECRET="37e9d619923e33d16a4f521d2389121feeb29be23njn479cf2cb80e97b62f0bde71c7938029l2k8291k"
 
-           
+            PORT=4002
+            BASE_URL=http://${{ secrets.SERVER_IP }}:4002
+            EOL
 
             echo "🧹 Limpando cache do Docker antes do build"
             docker builder prune -f || true
 
             echo "📦 Buildando aplicação (com retry em caso de falha)"
-            if ! docker compose build ujc-repo-backend; then
+            if ! docker compose build ujc-repo; then
               echo "⚠️ Primeira tentativa de build falhou, tentando novamente..."
               sleep 10
-              docker compose build ujc-repo-backend --no-cache
+              docker compose build ujc-repo --no-cache
             fi
 
             echo "🧱 Executando migrations"
-            docker compose run --rm ujc-repo-backendyarn migrate
+            docker compose run --rm ujc-repo-backend yarn migrate
 
             echo "🚀 Subindo aplicação"
             docker compose up -d
 
             echo "✅ Verificando status"
             sleep 10  # Aguarda um pouco para o container inicializar
-            if ! docker compose ps | grep -q ujc-repo-backend; then
+            if ! docker compose ps | grep -q ujc-repo; then
               echo "❌ Erro: container não está rodando"
-              docker compose logs ujc-repo-backend
+              docker compose logs ujc-repo
               exit 1
             fi
 
