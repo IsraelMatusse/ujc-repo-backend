@@ -21,6 +21,22 @@ export class YearService {
     });
   }
 
+  async updateYear(id: string, data: YearCreationData) {
+    const year = await this.findById(id);
+    if (year.name !== data.name) {
+      if (await this.existsByName(data.name)) {
+        throw new ConflictException("Ano com este nome j\xE1 existe");
+      }
+    }
+    await prisma.year.update({
+      where: { id },
+      data: {
+        name: data.name,
+        order: data.order,
+      },
+    });
+  }
+
   async existsByName(name: string): Promise<boolean> {
     return !!(await prisma.year.findFirst({
       where: { name },

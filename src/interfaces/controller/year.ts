@@ -23,4 +23,15 @@ export class YearController {
       next(error);
     }
   }
+
+  async updateYear(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+      const data = req.body as YearCreationData;
+      await yearService.updateYear(id, data);
+      res.json(new ApiResponse(StatusCodes.OK, "Ano atualizado com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

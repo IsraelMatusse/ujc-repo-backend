@@ -30,6 +30,23 @@ export class SemesterService {
     });
   }
 
+  async updateSemester(id: string, data: SemesterCreationData) {
+    const semester = await this.findById(id);
+    if (semester.name !== data.name) {
+      if (await this.existsByName(data.name)) {
+        throw new ConflictException("Semestre com este nome j\xE1 existe");
+      }
+    }
+    const year = await yearService.findById(data.yearId);
+    await prisma.semester.update({
+      where: { id },
+      data: {
+        name: data.name,
+        yearId: year.id,
+      },
+    });
+  }
+
   async getSemesters(): Promise<SemesterResponse[]> {
     const semesters = await prisma.semester.findMany({
       include: { year: true },

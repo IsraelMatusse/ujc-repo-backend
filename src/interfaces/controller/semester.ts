@@ -16,6 +16,17 @@ export class SemesterController {
     }
   }
 
+  async updateSenester(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+      const data = req.body as SemesterCreationData;
+      await semesterService.updateSemester(id, data);
+      res.json(new ApiResponse(StatusCodes.OK, "Semestre atualizado com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getAllSemesters(req: Request, res: Response, next: NextFunction) {
     try {
       const semesters = await semesterService.getSemesters();
