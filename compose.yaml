@@ -13,6 +13,7 @@ services:
       DATABASE_NAME: ujc_repo_db
       NODE_ENV: production
       JWT_ISSUER: UJCRepo
+      TOKEN_SECRET: 37e9d619923e33d16a4f521d2389121feeb29be23njn479cf2cb80e97b62f0bde71c7938029l2k8291k
       SECRET_KEY: 37e9d6ab3e33d16a4f521d0421feeb29be71479cf2cb80e97b62f0bde71c7d3a
       PORT: 4002
     volumes:
