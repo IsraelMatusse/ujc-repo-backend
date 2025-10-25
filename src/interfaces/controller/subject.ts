@@ -15,6 +15,17 @@ export class SubjectController {
     }
   }
 
+  async updateSubject(req: Request, res: Response, next: NextFunction) {
+    try {
+      const subjectId = req.params.id;
+      const data = req.body;
+      await subjectService.updateSubject(subjectId, data);
+      res.json(new ApiResponse(StatusCodes.OK, "Disciplina atualizada com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getAllSubjects(req: Request, res: Response, next: NextFunction) {
     try {
       const subjects = await subjectService.findAll();

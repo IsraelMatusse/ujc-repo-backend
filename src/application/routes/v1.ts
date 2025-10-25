@@ -52,12 +52,14 @@ routes.get("/semesters/year/:yearId", rateLimiter, authenticateToken, semesterCo
 //course
 routes.post("/courses", rateLimiter, courseController.createCourse.bind(courseController));
 routes.get("/courses", rateLimiter, courseController.getAllCourses.bind(courseController));
+routes.put("/courses/:id", rateLimiter, courseController.updateCourse.bind(courseController));
 routes.get("/courses/:id", rateLimiter, courseController.getCourseDetailsById.bind(courseController));
 
 //subjects
 routes.post("/subjects", rateLimiter, authenticateToken, subjectController.createSubject.bind(subjectController));
 routes.get("/subjects", rateLimiter, subjectController.getAllSubjects.bind(subjectController));
 routes.get("/subjects/:id", rateLimiter, subjectController.getSubjectById.bind(subjectController));
+routes.put("/subjects/:id", rateLimiter, authenticateToken, subjectController.updateSubject.bind(subjectController));
 routes.get("/subjects/course/:courseId", rateLimiter, subjectController.getSubjectsByCourse.bind(subjectController));
 routes.get("/subjects/semester/:semesterId", rateLimiter, subjectController.getSubjectsBySemester.bind(subjectController));
 

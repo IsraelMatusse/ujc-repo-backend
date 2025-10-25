@@ -22,6 +22,21 @@ export class CourseService {
     }));
   }
 
+  async updateCourse(id: string, data: CourseRequest) {
+    const course = await this.findById(id);
+    if (course.name !== data.name) {
+      if (await this.existsByName(data.name)) {
+        throw new ConflictException("Curso com este nome j\xE1 existe");
+      }
+    }
+    await prisma.course.update({
+      where: { id },
+      data: {
+        name: data.name,
+      },
+    });
+  }
+
   async getCoursesWithSubjects(): Promise<CourseWithSubjects[]> {
     const courses = await prisma.course.findMany({
       where: { status: true, deletedAt: null },
