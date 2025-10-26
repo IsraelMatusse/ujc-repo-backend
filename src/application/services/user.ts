@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException, UnprocessableEntityException } from "#infrastructure/exceptions/defaultExceptions";
 import { AuthUser } from "#infrastructure/types";
 import { generateAleatoryCodes } from "#infrastructure/utils/codes";
-import { UpdateUserEmailData, UserCreationData, UserUpdatePasswordData } from "#interfaces/request/user";
+import { EmailData, EmailSendDTO, UpdateUserEmailData, UserCreationData, UserUpdatePasswordData } from "#interfaces/request/user";
 import bcrypt from "bcrypt";
 import { UserResponse } from "#interfaces/response/user";
 import { Prisma, PrismaClient, User } from "#generated/prisma";
@@ -81,21 +81,15 @@ export class UserService {
   }
 
   async updateUserPassword(authUser: AuthUser, passwordData: UserUpdatePasswordData): Promise<void> {
-    if (passwordData.password !== passwordData.confirmPassword) {
-      throw new UnprocessableEntityException("A confirma\xE7\xE3o da palavra-passe n\xE3o corresponde.");
+    const user = await this.getOnlineUser(authUser);
+
+    if (user.password != (await bcrypt.hash(passwordData.currentPassword, 10))) {
+      throw new UnprocessableEntityException("Senha atual incorreta");
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException("Usu\xE1rio n\xE3o encontrado.");
-    }
-
-    const hashedPassword = await bcrypt.hash(passwordData.password, 10);
+    const hashedPassword = await bcrypt.hash(passwordData.newPassword, 10);
     await prisma.user.update({
-      where: { id: authUser.userId },
+      where: { id: user?.id },
       data: { password: hashedPassword },
     });
   }
@@ -142,5 +136,36 @@ export class UserService {
         password: user.password,
       },
     });
+  }
+
+  async updateEmail(data: UpdateUserEmailData) {
+    const user = await this.findByEmail(data.email);
+
+    if (data.email != user.email) {
+      if (await this.existsByEmail(data.email)) {
+        throw new ConflictException("Email ja em uso");
+      }
+    }
+    await prisma.user.update({
+      where: {
+        id: user.id,
+        status: true,
+      },
+      data: {
+        email: data.email,
+      },
+    });
+  }
+
+  async forgotPassword(emailData: EmailData) {
+    const user = await this.findByEmail(emailData.email);
+  }
+
+  async mapEmailToUsers<T extends EmailData>(data: T, subject: string, text: string): Promise<EmailSendDTO> {
+    return {
+      emailTo: data.email,
+      subject: subject,
+      text: text,
+    };
   }
 }

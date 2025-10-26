@@ -11,6 +11,7 @@ import { SemesterController } from "#interfaces/controller/semester";
 import { CourseController } from "#interfaces/controller/course";
 import { SubjectController } from "#interfaces/controller/subject";
 import { MaterialController } from "#interfaces/controller/material";
+import { StatsController } from "#interfaces/controller/stats";
 
 const routes = express.Router();
 
@@ -23,6 +24,7 @@ const semesterController = new SemesterController();
 const courseController = new CourseController();
 const subjectController = new SubjectController();
 const materialController = new MaterialController();
+const statsController = new StatsController();
 
 routes.get("/", rateLimiter, healthController.checkApiHealth);
 routes.post("/auth/login", rateLimiter, authController.login.bind(authController));
@@ -68,4 +70,7 @@ routes.post("/materials", rateLimiter, authenticateToken, materialController.cre
 routes.get("/materials", rateLimiter, materialController.getAllMaterials.bind(materialController));
 routes.get("/materials/subject/:subjectId", rateLimiter, materialController.getMaterialsBySubject.bind(materialController));
 routes.get("/materials/course/:courseId", rateLimiter, materialController.getMaterialsByCourse.bind(materialController));
+
+//stats
+routes.get("/stats", rateLimiter, statsController.getGenericStats.bind(statsController));
 export default routes;

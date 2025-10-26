@@ -8,10 +8,31 @@ export interface UserCreationData {
 }
 
 export interface UserUpdatePasswordData {
-  confirmPassword: string;
-  password: string;
+  newPassword: string;
+  currentPassword: string;
 }
 
 export interface UpdateUserEmailData {
   email: string;
 }
+
+export interface EmailData {
+  email: string;
+}
+export type OtpValidateDto = {
+  otp: string;
+};
+export type UpdatePassword = {
+  password: string;
+};
+export type ForgotPasswordDto = {
+  email: string;
+};
+export type OtpCreateDto = {
+  email: string;
+};
+export interface EmailSendDTO {
+  emailTo: string;
+  subject: string;
+  text: string;
+};
