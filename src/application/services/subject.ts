@@ -37,6 +37,26 @@ export class SubjectService {
     });
   }
 
+  async updateSubject(id: string, data: SubjectRequestData) {
+    const subject = await this.findById(id);
+
+    if (subject.name !== data.name || subject.courseId !== data.courseId) {
+      if (await this.existsByNameAndCourse(data.name, data.courseId)) {
+        throw new ConflictException("Disciplina com este nome j\xE1 existe");
+      }
+    }
+
+    await prisma.subject.update({
+      where: { id },
+      data: {
+        name: data.name,
+        credits: data.credits,
+        semesterId: data.semesterId,
+        courseId: data.courseId,
+      },
+    });
+  }
+
   async findById(id: string): Promise<Subject> {
     const subject = await prisma.subject.findUnique({
       where: { id },

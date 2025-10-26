@@ -33,4 +33,15 @@ export class CourseController {
       next(error);
     }
   }
+
+  async updateCourse(req: Request, res: Response, next: NextFunction) {
+    try {
+      const courseId = req.params.id;
+      const data = req.body;
+      await courseServe.updateCourse(courseId, data);
+      res.json(new ApiResponse(StatusCodes.OK, "Curso atualizado com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
