@@ -34,6 +34,7 @@ routes.patch("/users/password", rateLimiter, authenticateToken, userController.u
 routes.patch("/users/email", rateLimiter, authenticateToken, userController.updateUserEmail.bind(userController));
 routes.get("/users", rateLimiter, authenticateToken, userController.getAllUsers.bind(userController));
 routes.get("/users/me", rateLimiter, authenticateToken, userController.getOnlineUser.bind(userController));
+routes.delete("/users/:id", rateLimiter, authenticateToken, userController.desactivateUser.bind(userController));
 
 // Files
 routes.post("/files/upload", rateLimiter, uploadSingle, fileController.uploadFile.bind(fileController));
@@ -68,6 +69,7 @@ routes.get("/subjects/semester/:semesterId", rateLimiter, subjectController.getS
 //materials
 routes.post("/materials", rateLimiter, authenticateToken, materialController.createMaterial.bind(materialController));
 routes.get("/materials", rateLimiter, materialController.getAllMaterials.bind(materialController));
+routes.delete("/materials/:id", rateLimiter, authenticateToken, materialController.deleteMaterial.bind(materialController));
 routes.get("/materials/subject/:subjectId", rateLimiter, materialController.getMaterialsBySubject.bind(materialController));
 routes.get("/materials/course/:courseId", rateLimiter, materialController.getMaterialsByCourse.bind(materialController));
 

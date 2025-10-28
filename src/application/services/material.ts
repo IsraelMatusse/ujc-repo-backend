@@ -1,4 +1,4 @@
-import { PrismaClient } from "#generated/prisma";
+import { Material, PrismaClient } from "#generated/prisma";
 import { formatDateToSouthAfrica } from "#infrastructure/utils/dateUtils";
 import { MaterialRequest } from "#interfaces/request/material";
 import { MaterialResponse } from "#interfaces/response/material";
@@ -26,10 +26,19 @@ export class MaterialService {
       },
       where: {
         status: true,
+        deletedAt: null,
       },
       include: {
         file: true,
-        subject: true,
+        subject: {
+          include: {
+            semester: {
+              include: {
+                year: true,
+              },
+            },
+          },
+        },
       },
     });
     return materials.map((material) => ({
@@ -42,6 +51,12 @@ export class MaterialService {
       createdAt: formatDateToSouthAfrica(material.createdAt),
       status: material.status,
       subject: material.subject.name,
+      subjectId: material.subject.id,
+      couseId: material.subject.courseId,
+      semesterId: material.subject.semesterId,
+      semester: material.subject.semester.name,
+      yearId: material.subject.semester.year.id,
+      year: material.subject.semester.year.name,
     }));
   }
 
@@ -53,10 +68,19 @@ export class MaterialService {
       where: {
         subjectId,
         status: true,
+        deletedAt: null,
       },
       include: {
         file: true,
-        subject: true,
+        subject: {
+          include: {
+            semester: {
+              include: {
+                year: true,
+              },
+            },
+          },
+        },
       },
     });
     return materials.map((material) => ({
@@ -69,6 +93,12 @@ export class MaterialService {
       createdAt: formatDateToSouthAfrica(material.createdAt),
       status: material.status,
       subject: material.subject.name,
+      subjectId: material.subject.id,
+      couseId: material.subject.courseId,
+      semesterId: material.subject.semesterId,
+      semester: material.subject.semester.name,
+      yearId: material.subject.semester.year.id,
+      year: material.subject.semester.year.name,
     }));
   }
 
@@ -82,10 +112,19 @@ export class MaterialService {
           courseId,
         },
         status: true,
+        deletedAt: null,
       },
       include: {
         file: true,
-        subject: true,
+        subject: {
+          include: {
+            semester: {
+              include: {
+                year: true,
+              },
+            },
+          },
+        },
       },
     });
     return materials.map((material) => ({
@@ -98,6 +137,37 @@ export class MaterialService {
       createdAt: formatDateToSouthAfrica(material.createdAt),
       status: material.status,
       subject: material.subject.name,
+      subjectId: material.subject.id,
+      couseId: material.subject.courseId,
+      semesterId: material.subject.semesterId,
+      semester: material.subject.semester.name,
+      yearId: material.subject.semester.year.id,
+      year: material.subject.semester.year.name,
     }));
+  }
+
+  async findById(id: string): Promise<Material> {
+    const material = await prisma.material.findUnique({
+      where: {
+        id: id,
+        status: true,
+        deletedAt: null,
+      },
+    });
+    if (!material) {
+      throw new Error("Material não encontrado");
+    }
+    return material;
+  }
+
+  async deleteMaterial(id: string) {
+    const material = await this.findById(id);
+    await prisma.material.update({
+      where: { id: material.id },
+      data: {
+        status: false,
+        deletedAt: new Date(),
+      },
+    });
   }
 }

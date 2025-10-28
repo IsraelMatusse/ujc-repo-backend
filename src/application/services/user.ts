@@ -4,15 +4,33 @@ import { generateAleatoryCodes } from "#infrastructure/utils/codes";
 import { EmailData, EmailSendDTO, UpdateUserEmailData, UserCreationData, UserUpdatePasswordData } from "#interfaces/request/user";
 import bcrypt from "bcrypt";
 import { UserResponse } from "#interfaces/response/user";
-import { Prisma, PrismaClient, User } from "#generated/prisma";
+import { PrismaClient, User } from "#generated/prisma";
 import { formatDateToSouthAfrica } from "#infrastructure/utils/dateUtils";
 
 const prisma = new PrismaClient();
 export class UserService {
   async existsByEmail(email: string): Promise<boolean> {
     return !!(await prisma.user.findUnique({
-      where: { email },
+      where: { email, status: true, deletedAt: null },
     }));
+  }
+
+  async findById(userId: string): Promise<User> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId, status: true, deletedAt: null },
+    });
+    if (!user) {
+      throw new NotFoundException("Usu\xE1rio n\xE3o encontrado.");
+    }
+    return user;
+  }
+
+  async desactivateUser(userId: string) {
+    const user = this.findById(userId);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { status: false, deletedAt: new Date() },
+    });
   }
 
   async createUser(userData: UserCreationData): Promise<{ password: string; user: User }> {
@@ -35,7 +53,7 @@ export class UserService {
 
   async getOnlineUser(authUser: AuthUser): Promise<User> {
     const user = await prisma.user.findUnique({
-      where: { id: authUser.userId },
+      where: { id: authUser.userId, status: true, deletedAt: null },
     });
 
     if (!user) {
@@ -47,7 +65,7 @@ export class UserService {
 
   async getOnlineUserDetails(authUser: AuthUser): Promise<UserResponse> {
     const user = await prisma.user.findUnique({
-      where: { id: authUser.userId },
+      where: { id: authUser.userId, status: true, deletedAt: null },
     });
 
     if (!user) {
@@ -66,7 +84,12 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<UserResponse[]> {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      where: {
+        status: true,
+        deletedAt: null,
+      },
+    });
 
     return users.map((user) => ({
       id: user.id,
@@ -89,7 +112,7 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(passwordData.newPassword, 10);
     await prisma.user.update({
-      where: { id: user?.id },
+      where: { id: user?.id, status: true, deletedAt: null },
       data: { password: hashedPassword },
     });
   }
@@ -115,7 +138,7 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User> {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email, status: true, deletedAt: null },
     });
     if (!user) {
       throw new NotFoundException("Usu\xE1rio n\xE3o encontrado.");

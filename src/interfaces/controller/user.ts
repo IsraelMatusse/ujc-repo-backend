@@ -69,4 +69,14 @@ export class UserController {
       next(error);
     }
   }
+
+  async desactivateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.params.id;
+      await userService.desactivateUser(userId);
+      res.status(StatusCodes.OK).json(new ApiResponse(StatusCodes.OK, "Usuário desativado com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

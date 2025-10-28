@@ -43,4 +43,14 @@ export class MaterialController {
       next(error);
     }
   }
+
+  async deleteMaterial(req: Request, res: Response, next: NextFunction) {
+    try {
+      const materialId = req.params.id;
+      await materialService.deleteMaterial(materialId);
+      res.status(StatusCodes.OK).json(new ApiResponse(StatusCodes.OK, "Material eliminado com sucesso", null));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
