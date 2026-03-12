@@ -1,53 +1,40 @@
-
 services:
   ujc_repo:
     build: .
     ports:
-      - "4020:4002"
-    environment:
-      DATABASE_URL: postgresql://postgres:adminsecret@db:5432/ujc_repo_db
-      DATABASE_USER: postgres
-      DATABASE_PASS: adminsecret
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ujc_repo_db
-      NODE_ENV: production
-      JWT_ISSUER: UJCRepo
-      TOKEN_SECRET: 37e9d619923e33d16a4f521d2389121feeb29be23njn479cf2cb80e97b62f0bde71c7938029l2k8291k
-      SECRET_KEY: 37e9d6ab3e33d16a4f521d0421feeb29be71479cf2cb80e97b62f0bde71c7d3a
-      PORT: 4002
+      - "${APP_PORT}:${APP_INTERNAL_PORT}"
+    env_file: # Fixed typo
+      - .env
     volumes:
       - uploads:/usr/src/app/uploads
       - ./logs:/usr/src/app/logs
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Wait for DB to be ready, not just started
     command: sh -c "yarn prisma migrate deploy && yarn dev"
     networks:
       - ujcreponet
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4002/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${APP_INTERNAL_PORT}/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
   db:
-    image: postgres:16.0
-    container_name: ujc_repo_db
-    environment:
-      POSTGRES_DB: ujc_repo_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: adminsecret
-      POSTGRES_HOST_AUTH_METHOD: trust
+    image: postgres:${POSTGRES_VERSION:-15-alpine} # Fallback version
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    env_file: # Fixed typo
+      - .env
     networks:
       - ujcreponet
     volumes:
       - dbdata:/var/lib/postgresql/data
     ports:
-      - "5409:5432"
+      - "${DATABASE_EXTERNAL_PORT}:5432"
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ujc_repo_db"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
