@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+import { Role } from "#generated/prisma/index.js";
 import express from "express";
 
 export interface AuthUser {
   exp: string;
   iat: string;
+  role: Role;
   userId: string;
 }
 
@@ -23,5 +26,13 @@ export interface RegisterWithUserAndFile {
 }
 
 export interface RequestWithUser extends express.Request {
-  user: AuthUser;
+  user?: AuthUser;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: AuthUser;
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import { PrismaClient, User, Role } from "#generated/prisma";
-import { generateAleatoryCodes } from "#infrastructure/utils/codes";
+import { PrismaClient, Role } from "../src/generated/prisma";
+import { generateAleatoryCodes } from "../src/infrastructure/utils/codes";
+
 
 const prisma = new PrismaClient();
 

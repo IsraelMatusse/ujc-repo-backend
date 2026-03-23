@@ -126,10 +126,10 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-const port = process.env.PORT ?? "4000";
+const port = process.env.APP_INTERNAL_PORT ?? "4002";
 const server = app.listen(port, () => {
-  logger.info(`EVENTS_MEF_API: App listening on port ${port}. Started at ${new Date().toDateString()}`);
-  console.log(`EVENTS_MEF_API: App listening on port ${port}`);
+  logger.info(`UJC_REPO_API: App listening on port ${port}. Started at ${new Date().toDateString()}`);
+  console.log(`UJC_REPO_API: App listening on port ${port}`);
 });
 
 // Configurar timeout do servidor

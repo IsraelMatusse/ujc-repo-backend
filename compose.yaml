@@ -3,14 +3,14 @@ services:
     build: .
     ports:
       - "${APP_PORT}:${APP_INTERNAL_PORT}"
-    env_file: # Fixed typo
+    env_file: 
       - .env
     volumes:
       - uploads:/usr/src/app/uploads
       - ./logs:/usr/src/app/logs
     depends_on:
       db:
-        condition: service_healthy # Wait for DB to be ready, not just started
+        condition: service_healthy 
     command: sh -c "yarn prisma migrate deploy && yarn dev"
     networks:
       - ujcreponet
@@ -22,9 +22,9 @@ services:
       start_period: 40s
 
   db:
-    image: postgres:${POSTGRES_VERSION:-15-alpine} # Fallback version
+    image: postgres:${POSTGRES_VERSION:-15-alpine} 
     container_name: ${POSTGRES_CONTAINER_NAME}
-    env_file: # Fixed typo
+    env_file: 
       - .env
     networks:
       - ujcreponet

@@ -1,29 +1,33 @@
-
-import { AuthUser, RequestWithUser } from "#infrastructure/types/index.js";
+import { PrismaClient } from "#generated/prisma";
 import { ApiResponse } from "#interfaces/response/apiResponse.js";
-import { NextFunction,  Response } from "express";
+import { Request, Response, NextFunction } from "express"; 
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
+const prisma = new PrismaClient();
 
-function authenticateToken(req: RequestWithUser, res: Response, next: NextFunction): void {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(" ")[1];
+const secretKey = process.env.TOKEN_SECRET as string;
 
-  if (token == null) {
-    res.status(StatusCodes.UNAUTHORIZED).json(new ApiResponse(StatusCodes.UNAUTHORIZED, "Token not found in headers!", null));
-    return;
-  }
+export async function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authHeader = (req.headers as any).authorization;
+    const authorizationToken = authHeader && authHeader.split(" ")[1];
 
-  console.log("token", token);
-  jwt.verify(token, process.env.TOKEN_SECRET as string, (err: unknown, user: AuthUser) => {
-    if (err) {
-      res.status(StatusCodes.FORBIDDEN).json(new ApiResponse(StatusCodes.FORBIDDEN, "Token is invalid!", null));
+    if (!authorizationToken) {
+      res.status(StatusCodes.UNAUTHORIZED).json(new ApiResponse(StatusCodes.UNAUTHORIZED, "Token não fornecido", null));
       return;
     }
-    req.user = user;
-    next();
-  });
-}
+    const decodedToken = jwt.verify(authorizationToken, secretKey) as JwtPayload;
+    const user = await prisma.user.findUnique({ where: { id: decodedToken.userId } });
 
-export { authenticateToken };
+    if (!user) {
+      res.status(StatusCodes.FORBIDDEN).json(new ApiResponse(StatusCodes.FORBIDDEN, "Usuário não encontrado", null));
+      return;
+    }
+
+    next();
+  } catch (error) {
+    res.status(StatusCodes.UNAUTHORIZED).json(new ApiResponse(StatusCodes.UNAUTHORIZED, "Token revogado", error));
+    return;
+  }
+}

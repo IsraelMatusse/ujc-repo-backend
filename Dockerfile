@@ -5,25 +5,25 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 COPY prisma ./prisma
 
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
-RUN yarn install --frozen-lockfile --network-timeout 1000000
+RUN rm -rf node_modules/@prisma node_modules/.prisma && \
+    yarn add @prisma/client prisma --network-timeout 600000
 
 RUN yarn prisma generate
 
 COPY . .
 
-RUN mkdir -p /usr/src/app/logs && chown -R node:node /usr/src/app
+RUN mkdir -p /usr/src/app/logs && \
+    chown -R node:node /usr/src/app
 
-FROM node:22-bullseye-slim 
+FROM node:22-bullseye
 
 WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app .
 
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/package.json ./package.json
-COPY --from=builder /usr/src/app/prisma ./prisma
-COPY --from=builder /usr/src/app/dist ./dist 
-
-RUN mkdir -p logs uploads && chown -R node:node logs uploads
+RUN mkdir -p logs && chown -R node:node logs
+RUN mkdir -p /usr/src/app/uploads && chown -R node:node /usr/src/app/uploads
 
 USER node
 EXPOSE 4002
