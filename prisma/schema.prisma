@@ -7,11 +7,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
   ADMIN
   USER
+  DOCENTE
 }
 
 enum MaterialType {
@@ -25,6 +27,12 @@ enum MaterialType {
   EXERCICIOS
   IMAGEM
   OUTRO
+}
+
+enum SubmissionStatus {
+  APROVADO
+  REPROVADO
+  PENDENTE
 }
 
 model User {
@@ -125,6 +133,7 @@ model Material {
   updatedAt       DateTime     @default(now()) @db.Timestamp(6) @map("updated_at")
   deletedAt       DateTime?    @db.Timestamp(6) @map("deleted_at")
   type      MaterialType @default(FICHA)
+  submissionStatus SubmissionStatus @default(PENDENTE)
   subjectId String   @db.Uuid @map("subject_id")
   subject   Subject  @relation(fields: [subjectId], references: [id])
 

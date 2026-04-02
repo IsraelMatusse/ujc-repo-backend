@@ -2,7 +2,6 @@ import { Material, PrismaClient } from "#generated/prisma";
 import { formatDateToSouthAfrica } from "#infrastructure/utils/dateUtils";
 import { MaterialRequest } from "#interfaces/request/material";
 import { MaterialResponse } from "#interfaces/response/material";
-import { da } from "zod/v4/locales";
 
 const prisma = new PrismaClient();
 export class MaterialService {
